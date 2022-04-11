@@ -74,8 +74,8 @@ public class BattleManager : MonoBehaviour
         CM = FindObjectOfType<CardManager>();
         GiveHandCards(currentBattle.RemainingEnemyDeck, enemyHand, currentBattle.EnemyHand, currentBattle.EnemyDeck);     
         GiveHandCards(currentBattle.RemainingPlayerDeck, playerHand, currentBattle.PlayerHand, currentBattle.PlayerDeck);
-
-        StartCoroutine(TurnFunction());
+        StartCoroutine(PlayerTurn());
+        //StartCoroutine(TurnFunction());
         //CheckDeck();
     }
 
@@ -145,15 +145,25 @@ public class BattleManager : MonoBehaviour
         }
     }
   
-    private IEnumerator TurnFunction()
+    //private IEnumerator TurnFunction()
+    //{
+    //    if (isPlayerTurn)
+    //    else
+    //        StartCoroutine(EnemyTurn());
+    //} 
+    private IEnumerator PlayerTurn()
     {
-        if (isPlayerTurn)
-            yield return new WaitWhile(() => true);
-        else
-            StartCoroutine(EnemyTurn());
-    } 
+        endTurnButton.interactable = true;
+        Turn++;
+        GiveHandCards(currentBattle.RemainingPlayerDeck, playerHand, currentBattle.PlayerHand, currentBattle.PlayerDeck);
+        yield return new WaitWhile(() => isPlayerTurn);
+        StartCoroutine(EnemyTurn());
+    }
     private IEnumerator EnemyTurn()
     {
+        //Turn++;
+        endTurnButton.interactable = false;
+        GiveHandCards(currentBattle.RemainingEnemyDeck, enemyHand, currentBattle.EnemyHand, currentBattle.EnemyDeck);
         StopAllCoroutines();
         // while (currentBattle.EnemyHand.Count > 0 && sad < 3)
         for (int i = 0; i < enemyHand.childCount; i++)
@@ -163,23 +173,27 @@ public class BattleManager : MonoBehaviour
             //yield return new WaitForSeconds(.05f);
             //Debug.Log("wha");
         }
-        ChangeTurn();
+        // ChangeTurn();
+        StartCoroutine(PlayerTurn());
         yield return null;
     }
-    public void ChangeTurn()
+    //public void ChangeTurn()
+    //{
+    //    StopAllCoroutines();
+    //    endTurnButton.interactable = isPlayerTurn;
+    //    if (isPlayerTurn)
+    //    {
+          
+    //    }
+    //    else
+    //    {
+    //        GiveHandCards();       
+    //    }
+    //        StartCoroutine(TurnFunction());
+    //}
+    public void changeTurn()
     {
-        StopAllCoroutines();
         Turn++;
-        endTurnButton.interactable = isPlayerTurn;
-        if (isPlayerTurn)
-        {
-            GiveHandCards(currentBattle.RemainingPlayerDeck, playerHand, currentBattle.PlayerHand, currentBattle.PlayerDeck);
-        }
-        else
-        {
-            GiveHandCards(currentBattle.RemainingEnemyDeck, enemyHand, currentBattle.EnemyHand, currentBattle.EnemyDeck);       
-        }
-            StartCoroutine(TurnFunction());
     }
     public void Refill()
     {
