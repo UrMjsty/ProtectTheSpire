@@ -81,17 +81,17 @@ public class BattleManager : MonoBehaviour
 
    private void GiveHandCards(List<Card> remdeck, Transform handobj, List<Card> hand, List<Card> deck)
     {
-        
-        var cap = hand.Count;
-        for (int i = 0; i < cap; i++)
-        {
-            hand.RemoveAt(0);
-        }
-        foreach (Transform child in handobj)
-        {
-            GameObject.Destroy(child.gameObject);
-        }
-        for (int i = 0; i < handSize; i++)
+        var remcards = handobj.childCount;
+        //var cap = hand.Count;
+        //for (int i = 0; i < cap; i++)
+        //{
+        //    hand.RemoveAt(0);
+        //}
+        //foreach (Transform child in handobj)
+        //{
+        //    GameObject.Destroy(child.gameObject);
+        //}
+        for (int i = remcards; i < handSize; i++)
         {
             CardToHand(remdeck, handobj, hand, deck);
         }
@@ -154,14 +154,14 @@ public class BattleManager : MonoBehaviour
     private IEnumerator PlayerTurn()
     {
         endTurnButton.interactable = true;
-        Turn++;
+        //Turn++;
         GiveHandCards(currentBattle.RemainingPlayerDeck, playerHand, currentBattle.PlayerHand, currentBattle.PlayerDeck);
         yield return new WaitWhile(() => isPlayerTurn);
         StartCoroutine(EnemyTurn());
     }
     private IEnumerator EnemyTurn()
     {
-        //Turn++;
+        Turn++;
         endTurnButton.interactable = false;
         GiveHandCards(currentBattle.RemainingEnemyDeck, enemyHand, currentBattle.EnemyHand, currentBattle.EnemyDeck);
         StopAllCoroutines();
