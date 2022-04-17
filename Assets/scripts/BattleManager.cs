@@ -69,7 +69,7 @@ public class BattleManager : MonoBehaviour
     }    
     void Start()
     {
-        Turn = 0;
+        Turn = 1;
         currentBattle = new Battle();
         CM = FindObjectOfType<CardManager>();
         GiveHandCards(currentBattle.RemainingEnemyDeck, enemyHand, currentBattle.EnemyHand, currentBattle.EnemyDeck);     
@@ -153,10 +153,13 @@ public class BattleManager : MonoBehaviour
     //} 
     private IEnumerator PlayerTurn()
     {
+        StopAllCoroutines();
+        Debug.Log(isPlayerTurn);
         endTurnButton.interactable = true;
-        //Turn++;
+        Turn++;
         GiveHandCards(currentBattle.RemainingPlayerDeck, playerHand, currentBattle.PlayerHand, currentBattle.PlayerDeck);
-        yield return new WaitWhile(() => isPlayerTurn);
+        yield return new WaitWhile(() => true);
+        yield return new WaitForSeconds(3);
         StartCoroutine(EnemyTurn());
     }
     private IEnumerator EnemyTurn()
@@ -165,13 +168,12 @@ public class BattleManager : MonoBehaviour
         endTurnButton.interactable = false;
         GiveHandCards(currentBattle.RemainingEnemyDeck, enemyHand, currentBattle.EnemyHand, currentBattle.EnemyDeck);
         StopAllCoroutines();
+        Debug.Log("Enemy");
         // while (currentBattle.EnemyHand.Count > 0 && sad < 3)
-        for (int i = 0; i < enemyHand.childCount; i++)
+        for (int i = 0; i < enemyHand.childCount - 2; i++)
         {
             CM.Use(enemyHand.GetChild(i).gameObject);
-            Debug.Log("asd");
-            //yield return new WaitForSeconds(.05f);
-            //Debug.Log("wha");
+            
         }
         // ChangeTurn();
         StartCoroutine(PlayerTurn());
@@ -191,9 +193,10 @@ public class BattleManager : MonoBehaviour
     //    }
     //        StartCoroutine(TurnFunction());
     //}
-    public void changeTurn()
+    public void ChangeTurn()
     {
-        Turn++;
+        StopAllCoroutines();
+        StartCoroutine(EnemyTurn());
     }
     public void Refill()
     {
