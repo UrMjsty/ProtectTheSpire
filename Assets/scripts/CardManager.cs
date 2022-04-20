@@ -105,6 +105,6 @@ public class CardManager : MonoBehaviour
             }
         }
       // Debug.Log("lol why");
-        Destroy(cardgo);
+        Destroy(cardgo, .5f);
     }
 }

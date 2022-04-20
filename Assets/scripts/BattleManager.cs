@@ -163,14 +163,15 @@ public class BattleManager : MonoBehaviour
         yield return new WaitForSeconds(.5f);
         // StopAllCoroutines();
         var i = 0;
-        while (enemyHand.childCount > 1)
+        while (enemyHand.childCount > 0)
         {
             //var cardGo = enemyHand.GetChild(0).gameObject;
-            Debug.Log(enemyHand.GetChild(0).gameObject.GetComponent<CardInfo>().SelfCard.Name);
+            Debug.Log(enemyHand.GetChild(enemyHand.childCount - 1).gameObject.GetComponent<CardInfo>().SelfCard.Name);
             enemyHand.GetChild(enemyHand.childCount-1).gameObject.GetComponent<CardInfo>().ShowCardInfo(enemyHand.GetChild(enemyHand.childCount - 1).gameObject.GetComponent<CardInfo>().SelfCard);
             enemyHand.GetChild(enemyHand.childCount-1).gameObject.GetComponent<CardMovement>().MoveToField(enemyField);
+            CM.Use(enemyHand.GetChild(enemyHand.childCount - 1).gameObject);
             yield return new WaitForSeconds(.51f);
-            CM.Use(enemyHand.GetChild(enemyHand.childCount-1).gameObject);
+                   
             Debug.Log(enemyHand.childCount);
             i++;
         }
