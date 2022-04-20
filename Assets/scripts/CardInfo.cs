@@ -17,11 +17,11 @@ public class CardInfo : MonoBehaviour
 
     public void HideCardInfo(Card card)
     {
-        //SelfCard = card;
-        ShowCardInfo(card);
-        //Logo.sprite = null;
-        //Name.text = "";
-        //Description.text = "";
+        SelfCard = card;
+        //ShowCardInfo(card);
+        Logo.sprite = null;
+        Name.text = "";
+        Description.text = "";
     }
     public void ShowCardInfo(Card card)
     {

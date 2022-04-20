@@ -25,9 +25,9 @@ public class Battle
         //PlayerDeck.Add(CardManagerClass.AllCards[4]);
 
         EnemyDeck = new List<Card>();
-        EnemyDeck.Add(CardManagerClass.AllCards[0]);
+        EnemyDeck.Add(CardManagerClass.AllCards[3]);
         EnemyDeck.Add(CardManagerClass.AllCards[1]);
-        EnemyDeck.Add(CardManagerClass.AllCards[2]);
+        EnemyDeck.Add(CardManagerClass.AllCards[3]);
         EnemyDeck.Add(CardManagerClass.AllCards[2]);
       
         RemainingEnemyDeck = new List<Card>(EnemyDeck);
@@ -55,6 +55,8 @@ public class BattleManager : MonoBehaviour
     [SerializeField]
     private Transform enemyHand, playerHand;
     [SerializeField]
+    private Transform enemyField;
+    [SerializeField]
     private GameObject CardPrefab;
     [SerializeField]
     private Button endTurnButton;
@@ -75,8 +77,7 @@ public class BattleManager : MonoBehaviour
         GiveHandCards(currentBattle.RemainingEnemyDeck, enemyHand, currentBattle.EnemyHand, currentBattle.EnemyDeck);     
         GiveHandCards(currentBattle.RemainingPlayerDeck, playerHand, currentBattle.PlayerHand, currentBattle.PlayerDeck);
         StartCoroutine(PlayerTurn());
-        //StartCoroutine(TurnFunction());
-        //CheckDeck();
+       
     }
 
    private void GiveHandCards(List<Card> remdeck, Transform handobj, List<Card> hand, List<Card> deck)
@@ -109,7 +110,6 @@ public class BattleManager : MonoBehaviour
         hand.Add(card);
         GameObject cardgameObject = Instantiate(CardPrefab, handobj, false);
         cardgameObject.GetComponent<CardInfo>().SetColor(cardgameObject, card);
-        
         if (handobj == enemyHand)
             cardgameObject.GetComponent<CardInfo>().HideCardInfo(card);
         else
@@ -144,17 +144,9 @@ public class BattleManager : MonoBehaviour
             currentBattle.EnemyHand.RemoveAt(random);
         }
     }
-  
-    //private IEnumerator TurnFunction()
-    //{
-    //    if (isPlayerTurn)
-    //    else
-    //        StartCoroutine(EnemyTurn());
-    //} 
     private IEnumerator PlayerTurn()
     {
         StopAllCoroutines();
-        Debug.Log(isPlayerTurn);
         endTurnButton.interactable = true;
         Turn++;
         GiveHandCards(currentBattle.RemainingPlayerDeck, playerHand, currentBattle.PlayerHand, currentBattle.PlayerDeck);
@@ -167,32 +159,25 @@ public class BattleManager : MonoBehaviour
         Turn++;
         endTurnButton.interactable = false;
         GiveHandCards(currentBattle.RemainingEnemyDeck, enemyHand, currentBattle.EnemyHand, currentBattle.EnemyDeck);
-        StopAllCoroutines();
-        Debug.Log("Enemy");
-        // while (currentBattle.EnemyHand.Count > 0 && sad < 3)
-        for (int i = 0; i < enemyHand.childCount - 2; i++)
+        //var cardGo = enemyHand.GetChild(0).gameObject;
+        yield return new WaitForSeconds(.5f);
+        // StopAllCoroutines();
+        var i = 0;
+        while (enemyHand.childCount > 1)
         {
-            CM.Use(enemyHand.GetChild(i).gameObject);
-            
+            //var cardGo = enemyHand.GetChild(0).gameObject;
+            Debug.Log(enemyHand.GetChild(0).gameObject.GetComponent<CardInfo>().SelfCard.Name);
+            enemyHand.GetChild(enemyHand.childCount-1).gameObject.GetComponent<CardInfo>().ShowCardInfo(enemyHand.GetChild(enemyHand.childCount - 1).gameObject.GetComponent<CardInfo>().SelfCard);
+            enemyHand.GetChild(enemyHand.childCount-1).gameObject.GetComponent<CardMovement>().MoveToField(enemyField);
+            yield return new WaitForSeconds(.51f);
+            CM.Use(enemyHand.GetChild(enemyHand.childCount-1).gameObject);
+            Debug.Log(enemyHand.childCount);
+            i++;
         }
-        // ChangeTurn();
         StartCoroutine(PlayerTurn());
         yield return null;
     }
-    //public void ChangeTurn()
-    //{
-    //    StopAllCoroutines();
-    //    endTurnButton.interactable = isPlayerTurn;
-    //    if (isPlayerTurn)
-    //    {
-          
-    //    }
-    //    else
-    //    {
-    //        GiveHandCards();       
-    //    }
-    //        StartCoroutine(TurnFunction());
-    //}
+    
     public void ChangeTurn()
     {
         StopAllCoroutines();
@@ -216,5 +201,22 @@ public class BattleManager : MonoBehaviour
             $"{ currentBattle.PlayerDeck.Count(c => c.Name == "small shield")} shield");
       
     }
-    
+    private void RestartGame()
+    {
+        StopAllCoroutines();
+        foreach (Transform card in playerHand)
+        {
+            Destroy(card.gameObject);
+        }
+        foreach (Transform card in enemyHand)
+        {
+            Destroy(card.gameObject);
+        }
+         
+    }
+    private void StartGame()
+    {
+
+
+    }
 }
