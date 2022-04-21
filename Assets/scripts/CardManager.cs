@@ -68,7 +68,7 @@ public class CardManager : MonoBehaviour
         CardManagerClass.AllCards.Add(new Card("Fast Shield", "sprites/cards/fastShield", 1, Card.CardType.PROTECT, Card.AbilityType.DRAW));
 
     }
-    public void Use(GameObject cardgo)
+    public void Use(GameObject cardgo, float time)
     {
         Card card = cardgo.GetComponent<CardInfo>().SelfCard;
         cardgo.GetComponent<CardInfo>().ShowCardInfo(card);
@@ -105,6 +105,6 @@ public class CardManager : MonoBehaviour
             }
         }
       // Debug.Log("lol why");
-        Destroy(cardgo, .5f);
+        Destroy(cardgo, time);
     }
 }

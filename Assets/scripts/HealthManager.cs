@@ -5,6 +5,22 @@ using UnityEngine.UI;
 
 public class HealthManager : MonoBehaviour
 {
+    [Header("Numbers")]
+    [SerializeField]
+    [Min(0)]
+    private int playerHealth;
+    [SerializeField]
+    private int playerArmor;
+    [SerializeField]
+    [Min(0)]
+    private int enemyHealth;
+    [SerializeField]
+    private int enemyArmor;
+    [SerializeField]
+    [Min(0)]
+    private int maxHealth;
+
+    [Header("Texts")]
     [SerializeField]
     private Text PlayerHealth;
     [SerializeField]
@@ -16,16 +32,7 @@ public class HealthManager : MonoBehaviour
     [SerializeField]
     private Text resultText;
 
-    [SerializeField]
-    private int playerHealth;
-    [SerializeField]
-    private int playerArmor;
-    [SerializeField]
-    private int enemyHealth;
-    [SerializeField]
-    private int enemyArmor;
-    [SerializeField]
-    private int maxHealth;
+   
 
     [SerializeField]
     private GameObject resultGO;

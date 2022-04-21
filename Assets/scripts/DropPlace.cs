@@ -31,7 +31,7 @@ public class DropPlace : MonoBehaviour, IDropHandler
         if (fieldType != FieldType.PLAYABLE_ZONE || cardscr.GetComponent<CardMovement>().DefaultParent != playerHand || !BM.isPlayerTurn)
             return;
         //CC.Use(card);
-        CM.Use(cardscr.gameObject);
+        CM.Use(cardscr.gameObject, 0);
         //Destroy(cardscr.transform.gameObject);
         
             

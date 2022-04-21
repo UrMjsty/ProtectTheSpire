@@ -159,21 +159,16 @@ public class BattleManager : MonoBehaviour
         Turn++;
         endTurnButton.interactable = false;
         GiveHandCards(currentBattle.RemainingEnemyDeck, enemyHand, currentBattle.EnemyHand, currentBattle.EnemyDeck);
-        //var cardGo = enemyHand.GetChild(0).gameObject;
         yield return new WaitForSeconds(.5f);
-        // StopAllCoroutines();
-        var i = 0;
         while (enemyHand.childCount > 0)
         {
             //var cardGo = enemyHand.GetChild(0).gameObject;
             Debug.Log(enemyHand.GetChild(enemyHand.childCount - 1).gameObject.GetComponent<CardInfo>().SelfCard.Name);
+            CM.Use(enemyHand.GetChild(enemyHand.childCount - 1).gameObject, 0.5f);
             enemyHand.GetChild(enemyHand.childCount-1).gameObject.GetComponent<CardInfo>().ShowCardInfo(enemyHand.GetChild(enemyHand.childCount - 1).gameObject.GetComponent<CardInfo>().SelfCard);
             enemyHand.GetChild(enemyHand.childCount-1).gameObject.GetComponent<CardMovement>().MoveToField(enemyField);
-            CM.Use(enemyHand.GetChild(enemyHand.childCount - 1).gameObject);
             yield return new WaitForSeconds(.51f);
-                   
-            Debug.Log(enemyHand.childCount);
-            i++;
+            
         }
         StartCoroutine(PlayerTurn());
         yield return null;
