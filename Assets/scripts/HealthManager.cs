@@ -20,6 +20,12 @@ public class HealthManager : MonoBehaviour
     [Min(0)]
     private int maxHealth;
 
+    [HideInInspector]
+    public int startPlayerHealth;
+    public int startPlayerArmor;
+    public int startEnemyHealth; 
+    public int startEnemyArmor;
+
     [Header("Texts")]
     [SerializeField]
     private Text PlayerHealth;
@@ -33,16 +39,17 @@ public class HealthManager : MonoBehaviour
     private Text resultText;
 
    
-
+    [Header("GameObjects")]
     [SerializeField]
     private GameObject resultGO;
 
     private void Start()
     {
-        EnemyArmor.text = enemyArmor.ToString();
-        EnemyHealth.text = enemyHealth.ToString();
-        PlayerArmor.text = playerArmor.ToString();
-        PlayerHealth.text = playerHealth.ToString();
+        startEnemyArmor = 0;
+        startEnemyHealth = 5;
+        startPlayerArmor = 5;
+        startPlayerHealth = 5;
+        StartGame();
     }
     public void DealDamage(int value, bool isPlayer)
     {
@@ -109,5 +116,18 @@ public class HealthManager : MonoBehaviour
             else
                 resultText.text = "Win";
         }
+    }
+
+    public void StartGame()
+    {
+        playerHealth = startPlayerHealth;
+        PlayerHealth.text = playerHealth.ToString();
+        playerArmor = startPlayerArmor;
+        PlayerArmor.text = playerArmor.ToString();
+        enemyHealth = startEnemyHealth;
+        EnemyHealth.text = enemyHealth.ToString();
+        enemyArmor = startEnemyArmor;
+        EnemyArmor.text = enemyArmor.ToString();
+        resultGO.SetActive(false);      
     }
 }
