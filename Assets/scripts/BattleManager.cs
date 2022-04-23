@@ -107,11 +107,9 @@ public class BattleManager : MonoBehaviour
         Card card = remdeck[pos];
         hand.Add(card);
         GameObject cardgameObject = Instantiate(CardPrefab, handobj, false);
-        cardgameObject.GetComponent<CardInfo>().SetColor(cardgameObject, card);
+        cardgameObject.GetComponent<CardInfo>().ShowCardInfo(card, cardgameObject);
         if (handobj == enemyHand)
             cardgameObject.GetComponent<CardInfo>().HideCardInfo(card);
-        else
-            cardgameObject.GetComponent<CardInfo>().ShowCardInfo(card);
         remdeck.RemoveAt(pos);
 
     }
@@ -162,7 +160,7 @@ public class BattleManager : MonoBehaviour
         {
             //var cardGo = enemyHand.GetChild(0).gameObject;
             Debug.Log(enemyHand.GetChild(enemyHand.childCount - 1).gameObject.GetComponent<CardInfo>().SelfCard.Name);
-            enemyHand.GetChild(enemyHand.childCount-1).gameObject.GetComponent<CardInfo>().ShowCardInfo(enemyHand.GetChild(enemyHand.childCount - 1).gameObject.GetComponent<CardInfo>().SelfCard);
+            enemyHand.GetChild(enemyHand.childCount - 1).gameObject.GetComponent<CardInfo>().ShowCardInfo(enemyHand.GetChild(enemyHand.childCount - 1).gameObject.GetComponent<CardInfo>().SelfCard, enemyHand.GetChild(enemyHand.childCount-1).gameObject);
             enemyHand.GetChild(enemyHand.childCount-1).gameObject.GetComponent<CardMovement>().MoveToField(enemyField);
             yield return new WaitForSeconds(.51f);
             CM.Use(enemyHand.GetChild(enemyHand.childCount - 1).gameObject, 0.5f);

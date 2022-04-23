@@ -71,7 +71,7 @@ public class CardManager : MonoBehaviour
     public void Use(GameObject cardgo, float time)
     {
         Card card = cardgo.GetComponent<CardInfo>().SelfCard;
-        cardgo.GetComponent<CardInfo>().ShowCardInfo(card);
+        cardgo.GetComponent<CardInfo>().ShowCardInfo(card, cardgo);
         switch (card.Type)
         {
             case Card.CardType.ATTACK:
