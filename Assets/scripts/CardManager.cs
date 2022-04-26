@@ -43,6 +43,12 @@ public struct Card
 public static class CardManagerClass
 {
     public static List<Card> AllCards = new List<Card>();
+
+    public static List<Card> StartingDeck = new List<Card>();
+    public static List<Card> DummyDeck = new List<Card>();
+    public static List<Card> GoblinDeck = new List<Card>();
+    public static List<Card> RogueDeck = new List<Card>();
+    public static List<Card> BatDeck = new List<Card>();
 }
 public class CardManager : MonoBehaviour
 {
@@ -58,15 +64,22 @@ public class CardManager : MonoBehaviour
     }
     public void Awake()
     {
-        CardManagerClass.AllCards.Add(new Card("Punch", "sprites/cards/punch", 1, Card.CardType.ATTACK));
+        CardManagerClass.AllCards.Add(new Card("Punch", "sprites/cards/punch", 2, Card.CardType.ATTACK));
         CardManagerClass.AllCards.Add(new Card("Minor Heal", "sprites/cards/minorHeal", 2, Card.CardType.HEAL));
         CardManagerClass.AllCards.Add(new Card("Small Shield", "sprites/cards/smallShield", 1, Card.CardType.PROTECT));
-        CardManagerClass.AllCards.Add(new Card("BERSERK", "sprites/cards/berserk", 4, Card.CardType.ATTACK, Card.AbilityType.BERSERK));
-        CardManagerClass.AllCards.Add(new Card("Vampire Bite", "sprites/cards/vampireBite", 2, Card.CardType.ATTACK, Card.AbilityType.LIFESTEAL));
-       // CardManagerClass.AllCards.Add(new Card("Bat Bite", "sprites/cards/vampireBite", 1, Card.CardType.HEAL, Card.AbilityType.LIFESTEAL));
+        CardManagerClass.AllCards.Add(new Card("BERSERK", "sprites/cards/berserk", 6, Card.CardType.ATTACK, Card.AbilityType.BERSERK));
+        //CardManagerClass.AllCards.Add(new Card("Vampire Bite", "sprites/cards/vampireBite", 2, Card.CardType.ATTACK, Card.AbilityType.LIFESTEAL));
+        CardManagerClass.AllCards.Add(new Card("Bat Bite", "sprites/cards/vampireBite", 1, Card.CardType.ATTACK, Card.AbilityType.LIFESTEAL));
         //CardManagerClass.AllCards.Add(new Card("Poison Potion", "sprites/cards/poisonPotion", 5, Card.CardType.HEAL, Card.AbilityType.DISCARD));
         CardManagerClass.AllCards.Add(new Card("Fast Shield", "sprites/cards/fastShield", 1, Card.CardType.PROTECT, Card.AbilityType.DRAW));
 
+
+
+        CardManagerClass.StartingDeck = Starting();
+        CardManagerClass.DummyDeck = Dummy();
+        CardManagerClass.RogueDeck = Rogue();
+        CardManagerClass.GoblinDeck = Goblin();
+        CardManagerClass.BatDeck = Bat();
     }
     public void Use(GameObject cardgo, float time)
     {
@@ -106,5 +119,43 @@ public class CardManager : MonoBehaviour
         }
       // Debug.Log("lol why");
         Destroy(cardgo, time);
+    }
+    public List<Card> Starting()
+    {
+        var deck = new List<Card>();
+        deck.Add(CardManagerClass.AllCards[0]);
+        deck.Add(CardManagerClass.AllCards[0]);
+        deck.Add(CardManagerClass.AllCards[0]);
+        deck.Add(CardManagerClass.AllCards[2]);
+        deck.Add(CardManagerClass.AllCards[2]);
+        deck.Add(CardManagerClass.AllCards[1]);
+        return deck;
+    }
+    public List<Card> Dummy()
+    {
+        var deck = new List<Card>();
+        deck.Add(CardManagerClass.AllCards[2]);
+        deck.Add(CardManagerClass.AllCards[2]);
+        return deck;
+    }
+    public List<Card> Goblin()
+    {
+        var deck = new List<Card>();
+        deck.Add(CardManagerClass.AllCards[0]);
+        return deck;
+    }
+    public List<Card> Rogue()
+    {
+        var deck = new List<Card>();
+        deck.Add(CardManagerClass.AllCards[0]);
+        deck.Add(CardManagerClass.AllCards[0]);
+        deck.Add(CardManagerClass.AllCards[1]);
+        return deck;
+    }
+    public List<Card> Bat()
+    {
+        var deck = new List<Card>();
+        deck.Add(CardManagerClass.AllCards[4]);
+        return deck;
     }
 }

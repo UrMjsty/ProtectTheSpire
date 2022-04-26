@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class HealthManager : MonoBehaviour
 {
+    private BattleManager BM;
+    private GameManager GM;
     [Header("Numbers")]
     [SerializeField]
     [Min(0)]
@@ -45,11 +47,12 @@ public class HealthManager : MonoBehaviour
 
     private void Start()
     {
+        BM = FindObjectOfType<BattleManager>();
+        GM = FindObjectOfType<GameManager>();
         startEnemyArmor = 0;
         startEnemyHealth = 5;
         startPlayerArmor = 5;
         startPlayerHealth = 5;
-        StartGame();
     }
     public void DealDamage(int value, bool isPlayer)
     {
@@ -109,24 +112,27 @@ public class HealthManager : MonoBehaviour
     {
         if (enemyHealth == 0 || playerHealth == 0)
         {
-            resultGO.SetActive(true);
+            BM.EndGame();
+            //resultGO.SetActive(true);
             StopAllCoroutines();
             if (playerHealth == 0)
-                resultText.text = "Pathetic";
+                //  resultText.text = "Pathetic";
+                GM.LoseBattle();
             else
-                resultText.text = "Win";
+                //resultText.text = "Win";
+                GM.WinBattle();
         }
     }
 
-    public void StartGame()
+    public void StartBatte(Enemy enemy, Player player)
     {
-        playerHealth = startPlayerHealth;
+        playerHealth = player.Health;
         PlayerHealth.text = playerHealth.ToString();
-        playerArmor = startPlayerArmor;
+        playerArmor = player.Armor;
         PlayerArmor.text = playerArmor.ToString();
-        enemyHealth = startEnemyHealth;
+        enemyHealth = enemy.Health;
         EnemyHealth.text = enemyHealth.ToString();
-        enemyArmor = startEnemyArmor;
+        enemyArmor = enemy.Armor;
         EnemyArmor.text = enemyArmor.ToString();
         resultGO.SetActive(false);      
     }

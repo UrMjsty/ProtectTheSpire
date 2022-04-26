@@ -4,55 +4,18 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Battle 
-{
-    public List<Card> EnemyDeck, PlayerDeck,
-                      EnemyHand, PlayerHand,
-                      RemainingEnemyDeck, RemainingPlayerDeck;
-    private int deckSize = 4;
-    public Battle()
-    {
-        EnemyDeck = GiveDeckCard();
-        PlayerDeck = GiveDeckCard();
-        //PlayerDeck = new List<Card>();
-        //PlayerDeck.Add(CardManagerClass.AllCards[5]);
-        //PlayerDeck.Add(CardManagerClass.AllCards[5]);
-        //PlayerDeck.Add(CardManagerClass.AllCards[5]);
-        //PlayerDeck.Add(CardManagerClass.AllCards[5]);
-        //PlayerDeck.Add(CardManagerClass.AllCards[4]);
-        //PlayerDeck.Add(CardManagerClass.AllCards[4]);
-        //PlayerDeck.Add(CardManagerClass.AllCards[4]);
-        //PlayerDeck.Add(CardManagerClass.AllCards[4]);
 
-        EnemyDeck = new List<Card>();
-        EnemyDeck.Add(CardManagerClass.AllCards[3]);
-        EnemyDeck.Add(CardManagerClass.AllCards[1]);
-        EnemyDeck.Add(CardManagerClass.AllCards[3]);
-        EnemyDeck.Add(CardManagerClass.AllCards[2]);
-      
-        RemainingEnemyDeck = new List<Card>(EnemyDeck);
-        RemainingPlayerDeck = new List<Card>(PlayerDeck);
-
-        EnemyHand = new List<Card>();
-        PlayerHand = new List<Card>();
-
-        
-    }
-    private List<Card> GiveDeckCard()
-    {
-        List<Card> list = new List<Card>();
-        for (int i = 0; i < deckSize; i++)
-        {
-            list.Add(CardManagerClass.AllCards[Random.Range(0, CardManagerClass.AllCards.Count)]);
-        }
-        return list;
-    }
-}
 public class BattleManager : MonoBehaviour
 {
+    [SerializeField]
+    private Text playerName;
+    [SerializeField]
+    private Text enemyName;
+    private Enemy enemy;
+    [SerializeField]
+    private GameObject battleField;
     private CardManager CM;
     private HealthManager HM;
-    public Battle currentBattle;
     [SerializeField]
     private Transform enemyHand, playerHand;
     [SerializeField]
@@ -60,25 +23,31 @@ public class BattleManager : MonoBehaviour
     [SerializeField]
     private GameObject CardPrefab;
     [SerializeField]
+    private Image enemyImage;
+    [SerializeField]
     private Button endTurnButton;
     private int Turn;
-    private int handSize = 4;
+    private int playerHandSize = 4;
     public bool isPlayerTurn
     {
         get
         {
             return Turn % 2 == 0;
         }
-    }    
+    }
+
+    public List<Card> EnemyDeck, PlayerDeck,
+                      EnemyHand, PlayerHand,
+                      RemainingEnemyDeck, RemainingPlayerDeck;
     void Start()
     {
         CM = FindObjectOfType<CardManager>();
         HM = FindObjectOfType<HealthManager>();
-        StartGame();
-
+        // StartGame();
+        battleField.SetActive(false);
     }
 
-    private void GiveHandCards(List<Card> remdeck, Transform handobj, List<Card> hand, List<Card> deck)
+    private void GiveHandCards(List<Card> remdeck, Transform handobj, List<Card> hand, List<Card> deck,int handsize)
     {
         var remcards = handobj.childCount;
         //var cap = hand.Count;
@@ -90,7 +59,7 @@ public class BattleManager : MonoBehaviour
         //{
         //    GameObject.Destroy(child.gameObject);
         //}
-        for (int i = remcards; i < handSize; i++)
+        for (int i = remcards; i < handsize; i++)
         {
             CardToHand(remdeck, handobj, hand, deck);
         }
@@ -116,9 +85,9 @@ public class BattleManager : MonoBehaviour
     public void DrawCard()
     {
         if (isPlayerTurn)
-            CardToHand(currentBattle.RemainingPlayerDeck, playerHand, currentBattle.PlayerHand, currentBattle.PlayerDeck);
+            CardToHand(RemainingPlayerDeck, playerHand, PlayerHand, PlayerDeck);
         else
-            CardToHand(currentBattle.RemainingEnemyDeck, enemyHand, currentBattle.EnemyHand, currentBattle.EnemyDeck);
+            CardToHand(RemainingEnemyDeck, enemyHand, EnemyHand, EnemyDeck);
     }
     public void DiscardCard()
     {
@@ -129,7 +98,7 @@ public class BattleManager : MonoBehaviour
                 return;
             random = Random.Range(0, playerHand.childCount);
             Destroy(playerHand.GetChild(random).gameObject);
-            currentBattle.PlayerHand.RemoveAt(random);
+            PlayerHand.RemoveAt(random);
         }
         else
         {
@@ -137,7 +106,7 @@ public class BattleManager : MonoBehaviour
                 return;
             random = Random.Range(0, enemyHand.childCount);
             Destroy(enemyHand.GetChild(random).gameObject);
-            currentBattle.EnemyHand.RemoveAt(random);
+            EnemyHand.RemoveAt(random);
         }
     }
     private IEnumerator PlayerTurn()
@@ -145,7 +114,7 @@ public class BattleManager : MonoBehaviour
         StopAllCoroutines();
         endTurnButton.interactable = true;
         Turn++;
-        GiveHandCards(currentBattle.RemainingPlayerDeck, playerHand, currentBattle.PlayerHand, currentBattle.PlayerDeck);
+        GiveHandCards(RemainingPlayerDeck, playerHand, PlayerHand, PlayerDeck, playerHandSize);
         yield return new WaitWhile(() => true);
         yield return new WaitForSeconds(3);
         StartCoroutine(EnemyTurn());
@@ -154,12 +123,11 @@ public class BattleManager : MonoBehaviour
     {
         Turn++;
         endTurnButton.interactable = false;
-        GiveHandCards(currentBattle.RemainingEnemyDeck, enemyHand, currentBattle.EnemyHand, currentBattle.EnemyDeck);
+        GiveHandCards(RemainingEnemyDeck, enemyHand, EnemyHand, EnemyDeck, enemy.Handsize);
         yield return new WaitForSeconds(.5f);
         while (enemyHand.childCount > 0)
         {
             //var cardGo = enemyHand.GetChild(0).gameObject;
-            Debug.Log(enemyHand.GetChild(enemyHand.childCount - 1).gameObject.GetComponent<CardInfo>().SelfCard.Name);
             enemyHand.GetChild(enemyHand.childCount - 1).gameObject.GetComponent<CardInfo>().ShowCardInfo(enemyHand.GetChild(enemyHand.childCount - 1).gameObject.GetComponent<CardInfo>().SelfCard, enemyHand.GetChild(enemyHand.childCount-1).gameObject);
             enemyHand.GetChild(enemyHand.childCount-1).gameObject.GetComponent<CardMovement>().MoveToField(enemyField);
             yield return new WaitForSeconds(.51f);
@@ -177,14 +145,43 @@ public class BattleManager : MonoBehaviour
     }
     public void Refill()
     {
-        if (currentBattle.RemainingEnemyDeck.Count == 0)
-            currentBattle.RemainingEnemyDeck = new List<Card>(currentBattle.EnemyDeck);
-        if (currentBattle.RemainingPlayerDeck.Count == 0)
-            currentBattle.RemainingPlayerDeck = new List<Card>(currentBattle.PlayerDeck);
+        if (RemainingEnemyDeck.Count == 0)
+            RemainingEnemyDeck = new List<Card>(EnemyDeck);
+        if (RemainingPlayerDeck.Count == 0)
+            RemainingPlayerDeck = new List<Card>(PlayerDeck);
 
     }
-    
-    public void RestartGame()
+   
+    public void StartBattle(Enemy en, Player player)
+    {
+        enemy = en;
+
+        battleField.SetActive(true);
+        endTurnButton.interactable = true;
+
+        Turn = 1;
+
+        HM.StartBatte(enemy, player);
+
+        enemyImage.sprite = enemy.Image;
+        enemyName.text = enemy.Name;
+
+        playerName.text = player.Name;
+
+        EnemyDeck = new List<Card>(enemy.Deck);
+        PlayerDeck = new List<Card>(player.Deck);
+        RemainingEnemyDeck = new List<Card>(EnemyDeck);
+        RemainingPlayerDeck = new List<Card>(PlayerDeck);
+        EnemyHand = new List<Card>();
+        PlayerHand = new List<Card>();
+
+        GiveHandCards(RemainingEnemyDeck, enemyHand, EnemyHand, EnemyDeck, enemy.Handsize);
+        GiveHandCards(RemainingPlayerDeck, playerHand, PlayerHand, PlayerDeck, playerHandSize);
+
+        StartCoroutine(PlayerTurn());
+        
+    }
+    public void EndGame()
     {
         StopAllCoroutines();
         foreach (Transform card in playerHand)
@@ -196,22 +193,10 @@ public class BattleManager : MonoBehaviour
             Destroy(card.gameObject);
         }
 
-        currentBattle.EnemyDeck.Clear();
-        currentBattle.EnemyHand.Clear();
-        currentBattle.PlayerDeck.Clear();
-        currentBattle.PlayerHand.Clear();
-
-        StartGame();
-    }
-    private void StartGame()
-    {
-        endTurnButton.interactable = true;
-        Turn = 1;
-        currentBattle = new Battle();
-        HM.StartGame();
-        GiveHandCards(currentBattle.RemainingEnemyDeck, enemyHand, currentBattle.EnemyHand, currentBattle.EnemyDeck);
-        GiveHandCards(currentBattle.RemainingPlayerDeck, playerHand, currentBattle.PlayerHand, currentBattle.PlayerDeck);
-        StartCoroutine(PlayerTurn());
-        
+        EnemyDeck.Clear();
+        EnemyHand.Clear();
+        PlayerDeck.Clear();
+        PlayerHand.Clear();
+        battleField.SetActive(false);
     }
 }

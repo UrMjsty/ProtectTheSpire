@@ -98,12 +98,5 @@ public class CardInfo : MonoBehaviour
                 break;
         }
     }
-    public void Clutch()
-    {
-
-    }
-    private void Start()
-    { 
-       
-    }
+   
 }
