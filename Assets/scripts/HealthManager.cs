@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class HealthManager : MonoBehaviour
 {
+    private Enemy enemy;
+    private Player player;
     private BattleManager BM;
     private GameManager GM;
     [Header("Numbers")]
@@ -20,13 +22,13 @@ public class HealthManager : MonoBehaviour
     private int enemyArmor;
     [SerializeField]
     [Min(0)]
-    private int maxHealth;
+    private int enemyMaxHealth;
+    [SerializeField]
+    [Min(0)]
+    private int playerMaxHealth;
 
     [HideInInspector]
-    public int startPlayerHealth;
-    public int startPlayerArmor;
-    public int startEnemyHealth; 
-    public int startEnemyArmor;
+    
 
     [Header("Texts")]
     [SerializeField]
@@ -49,27 +51,24 @@ public class HealthManager : MonoBehaviour
     {
         BM = FindObjectOfType<BattleManager>();
         GM = FindObjectOfType<GameManager>();
-        startEnemyArmor = 0;
-        startEnemyHealth = 5;
-        startPlayerArmor = 5;
-        startPlayerHealth = 5;
+       
     }
     public void DealDamage(int value, bool isPlayer)
     {
         if (isPlayer)
         {
-            var delta = Mathf.Clamp(value - enemyArmor, 0, int.MaxValue);
-            enemyArmor = Mathf.Clamp(enemyArmor -= value, 0, int.MaxValue);
+            var delta = Mathf.Clamp(value * player.inventory.Weapon.Value - enemyArmor, 0, int.MaxValue);
+            enemyArmor = Mathf.Clamp(enemyArmor -= value * player.inventory.Weapon.Value, 0, int.MaxValue);
             EnemyArmor.text = enemyArmor.ToString();
-            enemyHealth = Mathf.Clamp(enemyHealth -= delta, 0, maxHealth);
+            enemyHealth = Mathf.Clamp(enemyHealth -= delta, 0, enemyMaxHealth);
             EnemyHealth.text = enemyHealth.ToString();
         }
         else
         {
-            var delta = Mathf.Clamp(value - playerArmor, 0, int.MaxValue);
-            playerArmor = Mathf.Clamp(playerArmor -= value, 0, int.MaxValue);
+            var delta = Mathf.Clamp(value * enemy.Damage - playerArmor, 0, int.MaxValue);
+            playerArmor = Mathf.Clamp(playerArmor -= value * enemy.Damage, 0, int.MaxValue);
             PlayerArmor.text = playerArmor.ToString();
-            playerHealth = Mathf.Clamp(playerHealth -= delta, 0, maxHealth);
+            playerHealth = Mathf.Clamp(playerHealth -= delta, 0, playerMaxHealth);
             PlayerHealth.text = playerHealth.ToString();
         }
         CheckForAlive();
@@ -79,12 +78,12 @@ public class HealthManager : MonoBehaviour
     {
         if (isPlayer)
         {
-            playerArmor += value;
+            playerArmor += value * player.inventory.Helmet.Value;
             PlayerArmor.text = playerArmor.ToString();
         }
         else
         {
-            enemyArmor += value;
+            enemyArmor += value * enemy.Armor;
             EnemyArmor.text = enemyArmor.ToString();
         }
     }
@@ -93,47 +92,45 @@ public class HealthManager : MonoBehaviour
     {
         if (isPlayer)
         {
-            playerHealth = Mathf.Clamp(playerHealth += value, 0, maxHealth);
+            playerHealth = Mathf.Clamp(playerHealth += value, 0, playerMaxHealth);
             PlayerHealth.text = playerHealth.ToString();
         }
         else
         {
-            enemyHealth = Mathf.Clamp(enemyHealth += value, 0, maxHealth);
+            enemyHealth = Mathf.Clamp(enemyHealth += value, 0, enemyMaxHealth);
             EnemyHealth.text = enemyHealth.ToString();
         }
-    }
-    private void ShowInfo()
-    {
-        Debug.Log(playerHealth);
-        Debug.Log(playerArmor);
-        Debug.Log(enemyHealth);
     }
     private void CheckForAlive()
     {
         if (enemyHealth == 0 || playerHealth == 0)
         {
             BM.EndGame();
-            //resultGO.SetActive(true);
             StopAllCoroutines();
             if (playerHealth == 0)
-                //  resultText.text = "Pathetic";
                 GM.LoseBattle();
             else
-                //resultText.text = "Win";
                 GM.WinBattle();
         }
     }
 
-    public void StartBatte(Enemy enemy, Player player)
+    public void StartBatte(Enemy en, Player pl)
     {
-        playerHealth = player.Health;
+        player = pl;
+        enemy = en;
+
+        playerHealth = player.inventory.Body.Value;
+        playerMaxHealth = playerHealth;
         PlayerHealth.text = playerHealth.ToString();
-        playerArmor = player.Armor;
+        playerArmor = 0;
         PlayerArmor.text = playerArmor.ToString();
+
         enemyHealth = enemy.Health;
+        enemyMaxHealth = enemyHealth;
         EnemyHealth.text = enemyHealth.ToString();
-        enemyArmor = enemy.Armor;
+        enemyArmor = 0;
         EnemyArmor.text = enemyArmor.ToString();
+
         resultGO.SetActive(false);      
     }
 }

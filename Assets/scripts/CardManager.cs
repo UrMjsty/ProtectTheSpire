@@ -64,7 +64,7 @@ public class CardManager : MonoBehaviour
     }
     public void Awake()
     {
-        CardManagerClass.AllCards.Add(new Card("Punch", "sprites/cards/punch", 2, Card.CardType.ATTACK));
+        CardManagerClass.AllCards.Add(new Card("Punch", "sprites/cards/punch", 1, Card.CardType.ATTACK));
         CardManagerClass.AllCards.Add(new Card("Minor Heal", "sprites/cards/minorHeal", 2, Card.CardType.HEAL));
         CardManagerClass.AllCards.Add(new Card("Small Shield", "sprites/cards/smallShield", 1, Card.CardType.PROTECT));
         CardManagerClass.AllCards.Add(new Card("BERSERK", "sprites/cards/berserk", 6, Card.CardType.ATTACK, Card.AbilityType.BERSERK));
@@ -107,7 +107,7 @@ public class CardManager : MonoBehaviour
                     HM.RestoreHealth(card.SpellValue, BM.isPlayerTurn);
                     break;
                 case Card.AbilityType.BERSERK:
-                    HM.DealDamage(card.SpellValue / 2, !BM.isPlayerTurn);
+                    HM.DealDamage(1, !BM.isPlayerTurn);
                     break;
                 case Card.AbilityType.DRAW:
                     BM.DrawCard();

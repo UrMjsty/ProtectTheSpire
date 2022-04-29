@@ -47,13 +47,13 @@ public class CardInfo : MonoBehaviour
         switch (card.Type)
         {
             case Card.CardType.ATTACK:
-                Description.text = $"Deal {card.SpellValue} Damage ";
+                Description.text = $"Attack {card.SpellValue}X Times";
                 break;
             case Card.CardType.HEAL:
                 Description.text = $"Restore {card.SpellValue} Health";
                 break;
             case Card.CardType.PROTECT:
-                Description.text = $"Gain {card.SpellValue} Armor";
+                Description.text = $"Defend {card.SpellValue}X Times";
                 break;
         }
         foreach (var ability in card.abilities)
