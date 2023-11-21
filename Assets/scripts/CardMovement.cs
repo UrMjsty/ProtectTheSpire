@@ -1,55 +1,57 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using DG.Tweening;
+using UnityEngine.Serialization;
 
 
 public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler
 {
     [SerializeField]
     private FieldType fieldType;
-    private Camera mainCamera;
-    private Vector3 offset;
-    private bool isDraggable;
-    public Transform DefaultParent;
-    private BattleManager BM;
+    private Camera _mainCamera;
+    private Vector3 _offset;
+    private bool _isDraggable;
+    [FormerlySerializedAs("DefaultParent")] public Transform defaultParent;
+    [SuppressMessage("ReSharper", "InconsistentNaming")] private BattleManager BM;
 
     private void Awake()
     {
-        mainCamera = Camera.allCameras[0];
+        _mainCamera = Camera.allCameras[0];
         BM = FindObjectOfType<BattleManager>();
     }
     public void OnBeginDrag(PointerEventData eventData)
     {
         
-        DefaultParent = transform.parent;
-        if (DefaultParent.TryGetComponent(out DropPlace dropPlace) && BM.isPlayerTurn)
+        defaultParent = transform.parent;
+        if (defaultParent.TryGetComponent(out DropPlace dropPlace) && BM.IsPlayerTurn)
         {
-            isDraggable = DefaultParent.GetComponent<DropPlace>().fieldType == FieldType.PLAYER_HAND;
+            _isDraggable = defaultParent.GetComponent<DropPlace>().fieldType == FieldType.PLAYER_HAND;
         }
         else
             return;
-        if (!isDraggable)
+        if (!_isDraggable)
             return;
-        offset = transform.position - mainCamera.ScreenToWorldPoint(eventData.position);
-        transform.SetParent(DefaultParent.parent);
+        _offset = transform.position - _mainCamera.ScreenToWorldPoint(eventData.position);
+        transform.SetParent(defaultParent.parent);
         GetComponent<CanvasGroup>().blocksRaycasts = false;
     }
 
     public void OnDrag(PointerEventData eventData)
     {
-        if (!isDraggable)
+        if (!_isDraggable)
             return;
-        Vector3 newPos = mainCamera.ScreenToWorldPoint(eventData.position);
-        transform.position = newPos + offset;
+        Vector3 newPos = _mainCamera.ScreenToWorldPoint(eventData.position);
+        transform.position = newPos + _offset;
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        if (!isDraggable)
+        if (!_isDraggable)
             return;
-        transform.SetParent(DefaultParent);
+        transform.SetParent(defaultParent);
         GetComponent<CanvasGroup>().blocksRaycasts = true;
 
     }

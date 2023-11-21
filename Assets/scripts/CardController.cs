@@ -26,19 +26,25 @@ public class CardController : MonoBehaviour
     {
         Card = card;
         isPlayerCard = isPC;
-    }
+    }/*
     public void Use(Card card)
     {
+        Character user = null;
+        Character victim = null;
+        if (BM.IsPlayerTurn)
+        {
+            user = 
+        }
         switch (card.Type)
         {
             case Card.CardType.ATTACK:
-                HM.DealDamage(card.SpellValue, BM.isPlayerTurn);
+                HM.TakeDamage(card.Value, BM.IsPlayerTurn);
                 break;
             case Card.CardType.HEAL:
-                HM.RestoreHealth(card.SpellValue, BM.isPlayerTurn);
+                HM.RestoreHealth(card.Value, BM.IsPlayerTurn);
                 break;
             case Card.CardType.PROTECT:
-                HM.GainArmor(card.SpellValue, BM.isPlayerTurn);
+                HM.GainArmor(card.Value, BM.IsPlayerTurn);
                 break;
             default:
                 break;
@@ -48,10 +54,10 @@ public class CardController : MonoBehaviour
             switch (ability)
             {
                 case Card.AbilityType.LIFESTEAL:
-                    HM.RestoreHealth(card.SpellValue, BM.isPlayerTurn);
+                    HM.RestoreHealth(card.Value, BM.IsPlayerTurn);
                     break;
                 case Card.AbilityType.BERSERK:
-                    HM.DealDamage(card.SpellValue / 2, BM.isPlayerTurn);
+                    HM.TakeDamage(card.Value / 2, BM.IsPlayerTurn);
                     break;
                 case Card.AbilityType.DRAW:
                     BM.DrawCard();
@@ -63,4 +69,5 @@ public class CardController : MonoBehaviour
         }
         
     }
+    */
 }

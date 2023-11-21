@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -5,98 +6,95 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class CardInfo : MonoBehaviour
-{
-    public Card SelfCard;
-    public Transform back;
-    public Image Logo;
-    public Transform cardBack;
-    public Transform image;
-    public TextMeshProUGUI Name;
-    public TextMeshProUGUI Description;
-    public GameObject cardGO;
-    private Color32 attackColor = new Color32(172, 50, 50, 150),
-                    healColor = new Color32(106, 190, 48, 150),
-                    protectColor = new Color32(95, 208, 228, 150);
+{ 
+    public Card SelfCard { get; private set; }
+    private Transform Back { get; set; }
+    [SerializeField] private Image logo;
+    private Transform CardBack { get; set; }
+    private Transform Image1 { get; set; }
+    [SerializeField] private TextMeshProUGUI cardName;
+    [SerializeField] private TextMeshProUGUI description;
+    public GameObject cardGo;
+    private readonly Color32 _attackColor = new Color32(172, 50, 50, 150),
+                    _healColor = new Color32(106, 190, 48, 150),
+                    _protectColor = new Color32(95, 208, 228, 150);
+    
 
     public void HideCardInfo(Card card)
     {
-        cardBack.gameObject.SetActive(true);
-        image.GetComponent<Image>().color = Color.clear;
-        back.GetComponent<Image>().color = Color.clear;
+        CardBack.gameObject.SetActive(true);
+        Image1.GetComponent<Image>().color = Color.clear;
+        Back.GetComponent<Image>().color = Color.clear;
         SelfCard = card;
         //ShowCardInfo(card);
-        Logo.sprite = Resources.Load<Sprite>("sprites/cards/cardBack");
-        Name.text = "";
-        Description.text = "";
+        logo.sprite = Resources.Load<Sprite>("sprites/cards/cardBack");
+        cardName.text = "";
+        description.text = "";
     }
     public void ShowCardInfo(Card card, GameObject cardGO)
     {
-        
         SelfCard = card;
-        Logo.sprite = card.Logo;
-        Logo.preserveAspect = true;
-        Name.text = card.Name;
-        Description.text = card.Description;
-        ShowDescription(card);
-        SetColor(cardGO, card);
-        cardBack.gameObject.SetActive(false);
-        back.GetComponent<Image>().color = Color.white;
+        logo.sprite = card.Logo;
+        logo.preserveAspect = true;
+        cardName.text = card.Name;
+        description.text = card.Description;
+        ShowDescription();
+        ShowColor(cardGO, card);
+        CardBack.gameObject.SetActive(false);
+        Back.GetComponent<Image>().color = Color.white;
     }
-    private void ShowDescription(Card card)
+    private void ShowDescription()
     {
-        switch (card.Type)
+        switch (SelfCard.Type)
         {
             case Card.CardType.ATTACK:
-                Description.text = $"Attack {card.SpellValue}X Times";
+                description.text = $"Attack {SelfCard.Value}X Times\n({SelfCard.Owner.Damage} Damage)";
                 break;
             case Card.CardType.HEAL:
-                Description.text = $"Restore {card.SpellValue} Health";
+                description.text = $"Restore {SelfCard.Value} Health";
                 break;
             case Card.CardType.PROTECT:
-                Description.text = $"Defend {card.SpellValue}X Times";
+                description.text = $"Defend {SelfCard.Value}X Times\n({SelfCard.Owner.ArmorUp}Armor)";
                 break;
         }
-        foreach (var ability in card.abilities)
+        foreach (var ability in SelfCard.Abilities)
         {
             switch (ability)
             {
                 case Card.AbilityType.LIFESTEAL:
-                    Description.text += "\n Lifesteal";
+                    description.text += "\n Lifesteal";
                     break;
                 case Card.AbilityType.BERSERK:
-                    Description.text += "\n BERSERK";
+                    description.text += "\n BERSERK";
                     break;
                 case Card.AbilityType.DRAW:
-                    Description.text += "\n Draw Card";
+                    description.text += "\n Draw Card";
                     break;
                 case Card.AbilityType.DISCARD:
-                    Description.text += "\n Discard Card";
-                    break;
-                default:
+                    description.text += "\n Discard Card";
                     break;
             }
         }
     }
-    public void SetColor(GameObject cardgo, Card card)
+
+    private void ShowColor(GameObject cardGO, Card card)
     {
-        back = cardgo.transform;
-        image = cardgo.transform.GetChild(0);
-        cardBack = cardgo.transform.GetChild(5);
-        // cardgo.transform.childcount == 5
+        Back = cardGO.transform;
+        Image1 = cardGO.transform.GetChild(0);
+        CardBack = cardGO.transform.GetChild(5);
         switch (card.Type)
         {
             case Card.CardType.ATTACK:
-                image.GetComponent<Image>().color = attackColor;
+                Image1.GetComponent<Image>().color = _attackColor;
                 break;
             case Card.CardType.HEAL:
-                image.GetComponent<Image>().color = healColor;
+                Image1.GetComponent<Image>().color = _healColor;
                 break;
             case Card.CardType.PROTECT:
-                image.GetComponent<Image>().color = protectColor;
-                break;
-            default:
+                Image1.GetComponent<Image>().color = _protectColor;
                 break;
         }
     }
+    
    
 }

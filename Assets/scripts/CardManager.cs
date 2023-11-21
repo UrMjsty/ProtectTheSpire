@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 
 public struct Card
@@ -18,45 +19,50 @@ public struct Card
         DISCARD,
         LIFESTEAL
     }
-    public string Name;
-    public string Description;
-    public Sprite Logo;
-    public int SpellValue;
-    public CardType Type;
-    public List<AbilityType> abilities;
+    public readonly string Name;
+    public readonly string Description;
+    public readonly Sprite Logo;
+    public readonly int Value;
+    public readonly CardType Type;
+    public readonly List<AbilityType> Abilities;
+    public Character Owner;
 
-    public Card(string name, string logoPath, int spellValue, 
-                CardType cardType = 0, AbilityType stAbility = 0, AbilityType ndAbility = 0, string description = "kek")
+    public Card(string name, string logoPath, int value, 
+                CardType cardType = 0, AbilityType stAbility = 0, AbilityType ndAbility = 0, string description = "")
     {
         Name = name;
         Description = description;
         Logo = Resources.Load<Sprite>(logoPath);
-        SpellValue = spellValue;
+        Value = value;
         Type = cardType;
-        abilities = new List<AbilityType>();
+        Abilities = new List<AbilityType>();
         if (stAbility != 0)
-            abilities.Add(stAbility);
+            Abilities.Add(stAbility);
         if (ndAbility != 0)
-            abilities.Add(ndAbility);
-    } 
+            Abilities.Add(ndAbility);
+        Owner = null;
+    }
+
+ 
 }
 public static class CardManagerClass
 {
-    public static List<Card> AllCards = new List<Card>();
-
-    public static List<Card> StartingDeck = new List<Card>();
-    public static List<Card> DummyDeck = new List<Card>();
-    public static List<Card> GoblinDeck = new List<Card>();
-    public static List<Card> RogueDeck = new List<Card>();
-    public static List<Card> BatDeck = new List<Card>();
+    public static readonly List<Card> AllCards = new List<Card>();
+    
+    public static List<Card> StartingDeck;
+    public static List<Card> DummyDeck;
+    public static List<Card> GoblinDeck;
+    public static List<Card> RogueDeck;
+    public static List<Card> BatDeck;
 }
 public class CardManager : MonoBehaviour
 {
-    private HealthManager HM;
-    private BattleManager BM;
+    [SuppressMessage("ReSharper", "InconsistentNaming")] private HealthManager HM;
+    [SuppressMessage("ReSharper", "InconsistentNaming")] private BattleManager BM;
     public bool isPlayerCard;
     public CardInfo cardInfo;
     public CardMovement cardMovement;
+    private Character User => BM.GetCurrentCharacter();
     private void Start()
     {
         HM = FindObjectOfType<HealthManager>();
@@ -65,97 +71,72 @@ public class CardManager : MonoBehaviour
     public void Awake()
     {
         CardManagerClass.AllCards.Add(new Card("Punch", "sprites/cards/punch", 1, Card.CardType.ATTACK));
-        CardManagerClass.AllCards.Add(new Card("Minor Heal", "sprites/cards/minorHeal", 2, Card.CardType.HEAL));
+        CardManagerClass.AllCards.Add(new Card("Minor Heal", "sprites/cards/minorHeal", 25, Card.CardType.HEAL));
         CardManagerClass.AllCards.Add(new Card("Small Shield", "sprites/cards/smallShield", 1, Card.CardType.PROTECT));
         CardManagerClass.AllCards.Add(new Card("BERSERK", "sprites/cards/berserk", 6, Card.CardType.ATTACK, Card.AbilityType.BERSERK));
         //CardManagerClass.AllCards.Add(new Card("Vampire Bite", "sprites/cards/vampireBite", 2, Card.CardType.ATTACK, Card.AbilityType.LIFESTEAL));
         CardManagerClass.AllCards.Add(new Card("Bat Bite", "sprites/cards/vampireBite", 1, Card.CardType.ATTACK, Card.AbilityType.LIFESTEAL));
-        //CardManagerClass.AllCards.Add(new Card("Poison Potion", "sprites/cards/poisonPotion", 5, Card.CardType.HEAL, Card.AbilityType.DISCARD));
+        //CardManagerClass.AllCards.Add(new Card("Poison Potion", "sprites/cards/poisonPotion", 55, Card.CardType.HEAL, Card.AbilityType.DISCARD));
         CardManagerClass.AllCards.Add(new Card("Fast Shield", "sprites/cards/fastShield", 1, Card.CardType.PROTECT, Card.AbilityType.DRAW));
 
 
-
-        CardManagerClass.StartingDeck = Starting();
-        CardManagerClass.DummyDeck = Dummy();
-        CardManagerClass.RogueDeck = Rogue();
-        CardManagerClass.GoblinDeck = Goblin();
-        CardManagerClass.BatDeck = Bat();
+        var startDeckIndices = new List<int>() {0,0,0,1,2,2};
+        var dummyDeckIndices = new List<int>() {2,2};
+        var goblinDeckIndices = new List<int>() {0};
+        var rogueDeckIndices = new List<int>() {0,0,1};
+        var batDeckIndices = new List<int>() {4};
+        CardManagerClass.StartingDeck = GetDeck(startDeckIndices);
+        CardManagerClass.DummyDeck = GetDeck(dummyDeckIndices);
+        CardManagerClass.RogueDeck = GetDeck(rogueDeckIndices);
+        CardManagerClass.GoblinDeck = GetDeck(goblinDeckIndices);
+        CardManagerClass.BatDeck = GetDeck(batDeckIndices);
     }
-    public void Use(GameObject cardgo, float time)
+    public void Use(GameObject cardGO, float time)
     {
-        Card card = cardgo.GetComponent<CardInfo>().SelfCard;
-        cardgo.GetComponent<CardInfo>().ShowCardInfo(card, cardgo);
+        Card card = cardGO.GetComponent<CardInfo>().SelfCard;
+        cardGO.GetComponent<CardInfo>().ShowCardInfo(card, cardGO);
         switch (card.Type)
         {
             case Card.CardType.ATTACK:
-                HM.DealDamage(card.SpellValue, BM.isPlayerTurn);
+                HM.TakeDamage(card.Value * User.Damage, User.Opponent);
                 break;
             case Card.CardType.HEAL:
-                HM.RestoreHealth(card.SpellValue, BM.isPlayerTurn);
+                HM.RestoreHealth(card.Value, User);
                 break;
             case Card.CardType.PROTECT:
-                HM.GainArmor(card.SpellValue, BM.isPlayerTurn);
-                break;
-            default:
+                HM.GainArmor(card.Value * User.ArmorUp, User);
                 break;
         }
-        foreach (var ability in card.abilities)
+        foreach (var ability in card.Abilities)
         {
             switch (ability)
             {
                 case Card.AbilityType.LIFESTEAL:
-                    HM.RestoreHealth(card.SpellValue, BM.isPlayerTurn);
+                    HM.RestoreHealth(card.Value * User.Damage / 2, User);
                     break;
                 case Card.AbilityType.BERSERK:
-                    HM.DealDamage(1, !BM.isPlayerTurn);
+                    HM.TakeDamage(1, User);
                     break;
                 case Card.AbilityType.DRAW:
-                    BM.DrawCard();
+                    BM.DrawCard(User);
                     break;
                 case Card.AbilityType.DISCARD:
-                    BM.DiscardCard();
+                    BM.DiscardCard(User);
                     break;
             }
         }
-      // Debug.Log("lol why");
-        Destroy(cardgo, time);
+        Destroy(cardGO, time);
     }
-    public List<Card> Starting()
+
+    private List<Card> GetDeck(List<int> indices)
     {
         var deck = new List<Card>();
-        deck.Add(CardManagerClass.AllCards[0]);
-        deck.Add(CardManagerClass.AllCards[0]);
-        deck.Add(CardManagerClass.AllCards[0]);
-        deck.Add(CardManagerClass.AllCards[2]);
-        deck.Add(CardManagerClass.AllCards[2]);
-        deck.Add(CardManagerClass.AllCards[1]);
-        return deck;
-    }
-    public List<Card> Dummy()
-    {
-        var deck = new List<Card>();
-        deck.Add(CardManagerClass.AllCards[2]);
-        deck.Add(CardManagerClass.AllCards[2]);
-        return deck;
-    }
-    public List<Card> Goblin()
-    {
-        var deck = new List<Card>();
-        deck.Add(CardManagerClass.AllCards[0]);
-        return deck;
-    }
-    public List<Card> Rogue()
-    {
-        var deck = new List<Card>();
-        deck.Add(CardManagerClass.AllCards[0]);
-        deck.Add(CardManagerClass.AllCards[0]);
-        deck.Add(CardManagerClass.AllCards[1]);
-        return deck;
-    }
-    public List<Card> Bat()
-    {
-        var deck = new List<Card>();
-        deck.Add(CardManagerClass.AllCards[4]);
+        foreach (int index in indices)
+        {
+            deck.Add(CardManagerClass.AllCards[index]);
+        }
+
         return deck;
     }
 }
+   

@@ -1,44 +1,27 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class HealthManager : MonoBehaviour
 {
-    private Enemy enemy;
-    private Player player;
-    private BattleManager BM;
-    private GameManager GM;
-    [Header("Numbers")]
-    [SerializeField]
-    [Min(0)]
-    private int playerHealth;
-    [SerializeField]
-    private int playerArmor;
-    [SerializeField]
-    [Min(0)]
-    private int enemyHealth;
-    [SerializeField]
-    private int enemyArmor;
-    [SerializeField]
-    [Min(0)]
-    private int enemyMaxHealth;
-    [SerializeField]
-    [Min(0)]
-    private int playerMaxHealth;
-
+    private Enemy _enemy;
+    private Player _player;
+    [SuppressMessage("ReSharper", "InconsistentNaming")] private BattleManager BM;
+    [SuppressMessage("ReSharper", "InconsistentNaming")] private GameManager GM;
+    [FormerlySerializedAs("PlayerHealth")]
     [HideInInspector]
-    
-
     [Header("Texts")]
     [SerializeField]
-    private Text PlayerHealth;
-    [SerializeField]
-    private Text EnemyHealth;
-    [SerializeField]
-    private Text PlayerArmor;
-    [SerializeField]
-    private Text EnemyArmor;
+    private Text playerHealthText;
+    [FormerlySerializedAs("EnemyHealth")] [SerializeField]
+    private Text enemyHealthText;
+    [FormerlySerializedAs("PlayerArmor")] [SerializeField]
+    private Text playerArmorText;
+    [FormerlySerializedAs("EnemyArmor")] [SerializeField]
+    private Text enemyArmorText;
     [SerializeField]
     private Text resultText;
 
@@ -53,84 +36,66 @@ public class HealthManager : MonoBehaviour
         GM = FindObjectOfType<GameManager>();
        
     }
-    public void DealDamage(int value, bool isPlayer)
+    public void TakeDamage(int value, Character victim)
     {
-        if (isPlayer)
-        {
-            var delta = Mathf.Clamp(value * player.inventory.Weapon.Value - enemyArmor, 0, int.MaxValue);
-            enemyArmor = Mathf.Clamp(enemyArmor -= value * player.inventory.Weapon.Value, 0, int.MaxValue);
-            EnemyArmor.text = enemyArmor.ToString();
-            enemyHealth = Mathf.Clamp(enemyHealth -= delta, 0, enemyMaxHealth);
-            EnemyHealth.text = enemyHealth.ToString();
-        }
-        else
-        {
-            var delta = Mathf.Clamp(value * enemy.Damage - playerArmor, 0, int.MaxValue);
-            playerArmor = Mathf.Clamp(playerArmor -= value * enemy.Damage, 0, int.MaxValue);
-            PlayerArmor.text = playerArmor.ToString();
-            playerHealth = Mathf.Clamp(playerHealth -= delta, 0, playerMaxHealth);
-            PlayerHealth.text = playerHealth.ToString();
-        }
+        var delta = Mathf.Clamp(value - victim.Armor, 0, int.MaxValue);
+        victim.Armor = Mathf.Clamp(victim.Armor -= value, 0, int.MaxValue);
+        victim.ArmorText.text = victim.Armor.ToString();
+        victim.Health = Mathf.Clamp(victim.Health -= delta, 0, victim.MaxHealth);
+        victim.HealthText.text = victim.Health.ToString();
+        
         CheckForAlive();
     }
 
-    public void GainArmor(int value, bool isPlayer)
+    public void GainArmor(int value, Character character)
     {
-        if (isPlayer)
-        {
-            playerArmor += value * player.inventory.Helmet.Value;
-            PlayerArmor.text = playerArmor.ToString();
-        }
-        else
-        {
-            enemyArmor += value * enemy.Armor;
-            EnemyArmor.text = enemyArmor.ToString();
-        }
+        character.Armor += value;
+        character.ArmorText.text = character.Armor.ToString();
     }
 
-    public void RestoreHealth(int value, bool isPlayer)
+    public void RestoreHealth(int value, Character character)
     {
-        if (isPlayer)
-        {
-            playerHealth = Mathf.Clamp(playerHealth += value, 0, playerMaxHealth);
-            PlayerHealth.text = playerHealth.ToString();
-        }
-        else
-        {
-            enemyHealth = Mathf.Clamp(enemyHealth += value, 0, enemyMaxHealth);
-            EnemyHealth.text = enemyHealth.ToString();
-        }
+        character.Health = Mathf.Clamp(character.Health += value, 0, character.MaxHealth); 
+        character.HealthText.text = character.Health.ToString();
+        enemyHealthText.text = _enemy.Health.ToString();
+        
     }
     private void CheckForAlive()
     {
-        if (enemyHealth == 0 || playerHealth == 0)
+        if (_enemy.Health == 0 || _player.Health == 0)
         {
             BM.EndGame();
             StopAllCoroutines();
-            if (playerHealth == 0)
+            if (_player.Health == 0)
                 GM.LoseBattle();
             else
                 GM.WinBattle();
         }
     }
 
-    public void StartBatte(Enemy en, Player pl)
+    public void StartBattle(Enemy en,ref Player pl)
     {
-        player = pl;
-        enemy = en;
+        _player = pl;
+        _enemy = en;
 
-        playerHealth = player.inventory.Body.Value;
-        playerMaxHealth = playerHealth;
-        PlayerHealth.text = playerHealth.ToString();
-        playerArmor = 0;
-        PlayerArmor.text = playerArmor.ToString();
+        _enemy.ArmorText = enemyArmorText;
+        _enemy.HealthText = enemyHealthText;
+        _player.ArmorText = playerArmorText;
+        _player.HealthText = playerHealthText;
+        
+        playerHealthText.text = _player.Health.ToString();
+        _player.Armor = 0;
+        playerArmorText.text = _player.Armor.ToString();
 
-        enemyHealth = enemy.Health;
-        enemyMaxHealth = enemyHealth;
-        EnemyHealth.text = enemyHealth.ToString();
-        enemyArmor = 0;
-        EnemyArmor.text = enemyArmor.ToString();
+        enemyHealthText.text = _enemy.Health.ToString();
+        _enemy.Armor = 0;
+        enemyArmorText.text = _enemy.Armor.ToString();
 
         resultGO.SetActive(false);      
+    }
+    public void WinBattle()
+    {
+        _enemy.Health = 0;
+        CheckForAlive();
     }
 }

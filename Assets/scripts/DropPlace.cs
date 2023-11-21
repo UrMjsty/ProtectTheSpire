@@ -28,7 +28,7 @@ public class DropPlace : MonoBehaviour, IDropHandler
 
         CardInfo cardscr = eventData.pointerDrag.GetComponent<CardInfo>();
         //Card card = cardscr.transform
-        if (fieldType != FieldType.PLAYABLE_ZONE || cardscr.GetComponent<CardMovement>().DefaultParent != playerHand || !BM.isPlayerTurn)
+        if (fieldType != FieldType.PLAYABLE_ZONE || cardscr.GetComponent<CardMovement>().defaultParent != playerHand || !BM.IsPlayerTurn)
             return;
         //CC.Use(card);
         CM.Use(cardscr.gameObject, 0);

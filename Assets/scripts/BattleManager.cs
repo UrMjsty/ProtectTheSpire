@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,34 +12,27 @@ public class BattleManager : MonoBehaviour
     private Text playerName;
     [SerializeField]
     private Text enemyName;
-    private Enemy enemy;
+    private Enemy _enemy;
+    private Player _player;
     [SerializeField]
     private GameObject battleField;
-    private CardManager CM;
-    private HealthManager HM;
+    [SuppressMessage("ReSharper", "InconsistentNaming")] private CardManager CM;
+    [SuppressMessage("ReSharper", "InconsistentNaming")] private HealthManager HM;
     [SerializeField]
     private Transform enemyHand, playerHand;
     [SerializeField]
     private Transform enemyField;
     [SerializeField]
-    private GameObject CardPrefab;
+    private GameObject cardPrefab;
     [SerializeField]
     private Image enemyImage;
     [SerializeField]
+    private Image playerImage;
+    [SerializeField]
     private Button endTurnButton;
-    private int Turn;
-    private int playerHandSize = 4;
-    public bool isPlayerTurn
-    {
-        get
-        {
-            return Turn % 2 == 0;
-        }
-    }
+    private int _turn;
+    public bool IsPlayerTurn => _turn % 2 == 0;
 
-    public List<Card> EnemyDeck, PlayerDeck,
-                      EnemyHand, PlayerHand,
-                      RemainingEnemyDeck, RemainingPlayerDeck;
     void Start()
     {
         CM = FindObjectOfType<CardManager>();
@@ -47,91 +41,75 @@ public class BattleManager : MonoBehaviour
         battleField.SetActive(false);
     }
 
-    private void GiveHandCards(List<Card> remdeck, Transform handobj, List<Card> hand, List<Card> deck,int handsize)
+    private void GiveHandCards(Character character)
     {
-        var remcards = handobj.childCount;
-        //var cap = hand.Count;
-        //for (int i = 0; i < cap; i++)
-        //{
-        //    hand.RemoveAt(0);
-        //}
-        //foreach (Transform child in handobj)
-        //{
-        //    GameObject.Destroy(child.gameObject);
-        //}
-        for (int i = remcards; i < handsize; i++)
+        var remcards = character.HandObject.childCount;
+        for (int i = remcards; i < character.Handsize; i++)
         {
-            CardToHand(remdeck, handobj, hand, deck);
+            CardToHand(character);
         }
     }
-    private void CardToHand(List<Card> remdeck, Transform handobj, List<Card> hand, List<Card> deck)
+    private void CardToHand(Character character)
     {
-        if (remdeck.Count == 0)
+        if (character.RemainingDeck.Count == 0)
         {
-            Refill();
-            remdeck = new List<Card>(deck);
+            Refill(character);
          
         }
-        var pos = Random.Range(0, remdeck.Count);
-        Card card = remdeck[pos];
-        hand.Add(card);
-        GameObject cardgameObject = Instantiate(CardPrefab, handobj, false);
-        cardgameObject.GetComponent<CardInfo>().ShowCardInfo(card, cardgameObject);
-        if (handobj == enemyHand)
-            cardgameObject.GetComponent<CardInfo>().HideCardInfo(card);
-        remdeck.RemoveAt(pos);
+        var pos = Random.Range(0, character.RemainingDeck.Count);
+        Card card = character.RemainingDeck[pos];
+        card.Owner = character;
+        character.Hand.Add(card);
+        GameObject cardGameObject = Instantiate(cardPrefab, character.HandObject, false);
+        cardGameObject.GetComponent<CardInfo>().ShowCardInfo(card, cardGameObject);
+        if (character == _enemy)
+            cardGameObject.GetComponent<CardInfo>().HideCardInfo(card);
+        character.RemainingDeck.RemoveAt(pos);
 
     }
-    public void DrawCard()
+    public void DrawCard(Character character)
     {
-        if (isPlayerTurn)
-            CardToHand(RemainingPlayerDeck, playerHand, PlayerHand, PlayerDeck);
-        else
-            CardToHand(RemainingEnemyDeck, enemyHand, EnemyHand, EnemyDeck);
+        CardToHand(character);
     }
-    public void DiscardCard()
+    public void DiscardCard(Character character)
     {
-        var random = 0;
-        if (isPlayerTurn)
-        {
-            if (playerHand.childCount == 0)
-                return;
-            random = Random.Range(0, playerHand.childCount);
-            Destroy(playerHand.GetChild(random).gameObject);
-            PlayerHand.RemoveAt(random);
-        }
-        else
-        {
-            if (enemyHand.childCount == 0)
-                return;
-            random = Random.Range(0, enemyHand.childCount);
-            Destroy(enemyHand.GetChild(random).gameObject);
-            EnemyHand.RemoveAt(random);
-        }
+        var childcount = character.HandObject.childCount;
+        if (childcount == 0)
+            return;
+        var random = Random.Range(0, childcount); 
+        Destroy(character.HandObject.GetChild(random).gameObject); 
+        character.Hand.RemoveAt(random);
+    }
+
+    public Character GetCurrentCharacter()
+    {
+        return IsPlayerTurn ? _player : _enemy;
     }
     private IEnumerator PlayerTurn()
     {
         StopAllCoroutines();
         endTurnButton.interactable = true;
-        Turn++;
-        GiveHandCards(RemainingPlayerDeck, playerHand, PlayerHand, PlayerDeck, playerHandSize);
+        _turn++;
+        GiveHandCards(_player);
         yield return new WaitWhile(() => true);
         yield return new WaitForSeconds(3);
         StartCoroutine(EnemyTurn());
     }
     private IEnumerator EnemyTurn()
     {
-        Turn++;
+        _turn++;
         endTurnButton.interactable = false;
-        GiveHandCards(RemainingEnemyDeck, enemyHand, EnemyHand, EnemyDeck, enemy.Handsize);
+        GiveHandCards(_enemy);
         yield return new WaitForSeconds(.5f);
-        while (enemyHand.childCount > 0)
+        while (_enemy.HandObject.childCount > 0)
         {
             //var cardGo = enemyHand.GetChild(0).gameObject;
-            enemyHand.GetChild(enemyHand.childCount - 1).gameObject.GetComponent<CardInfo>().ShowCardInfo(enemyHand.GetChild(enemyHand.childCount - 1).gameObject.GetComponent<CardInfo>().SelfCard, enemyHand.GetChild(enemyHand.childCount-1).gameObject);
-            enemyHand.GetChild(enemyHand.childCount-1).gameObject.GetComponent<CardMovement>().MoveToField(enemyField);
+            var enemyHandChildCount = _enemy.HandObject.childCount;
+            _enemy.HandObject.GetChild(enemyHandChildCount - 1).gameObject.GetComponent<CardInfo>().ShowCardInfo(_enemy.HandObject.GetChild(enemyHandChildCount - 1)
+                .gameObject.GetComponent<CardInfo>().SelfCard, _enemy.HandObject.GetChild(enemyHandChildCount-1).gameObject);
+            _enemy.HandObject.GetChild(enemyHandChildCount-1).gameObject.GetComponent<CardMovement>().MoveToField(enemyField);
             yield return new WaitForSeconds(.51f);
-            CM.Use(enemyHand.GetChild(enemyHand.childCount - 1).gameObject, 0.5f);
+            CM.Use(_enemy.HandObject.GetChild(enemyHandChildCount - 1).gameObject, 0.5f);
             yield return new WaitForSeconds(.51f);
         }
         StartCoroutine(PlayerTurn());
@@ -143,40 +121,43 @@ public class BattleManager : MonoBehaviour
         StopAllCoroutines();
         StartCoroutine(EnemyTurn());
     }
-    public void Refill()
-    {
-        if (RemainingEnemyDeck.Count == 0)
-            RemainingEnemyDeck = new List<Card>(EnemyDeck);
-        if (RemainingPlayerDeck.Count == 0)
-            RemainingPlayerDeck = new List<Card>(PlayerDeck);
 
+    private void Refill(Character character)
+    {
+        character.RemainingDeck = new List<Card>(character.Deck);
     }
    
-    public void StartBattle(Enemy en, Player player)
+    public void StartBattle(Enemy en,ref Player player)
     {
-        enemy = en;
+        _enemy = en;
+        _player = player;
 
+        _enemy.Opponent = _player;
+        _player.Opponent = _enemy;
+        
         battleField.SetActive(true);
         endTurnButton.interactable = true;
 
-        Turn = 1;
+        _turn = 1;
 
-        HM.StartBatte(enemy, player);
+        HM.StartBattle(_enemy,ref player);
 
-        enemyImage.sprite = enemy.Image;
-        enemyName.text = enemy.Name;
+        enemyImage.sprite = _enemy.Image;
+        enemyName.text = _enemy.Name;
 
+        playerImage.sprite = player.Image;
         playerName.text = player.Name;
 
-        EnemyDeck = new List<Card>(enemy.Deck);
-        PlayerDeck = new List<Card>(player.Deck);
-        RemainingEnemyDeck = new List<Card>(EnemyDeck);
-        RemainingPlayerDeck = new List<Card>(PlayerDeck);
-        EnemyHand = new List<Card>();
-        PlayerHand = new List<Card>();
+        _enemy.HandObject = enemyHand;
+        _player.HandObject = playerHand;
 
-        GiveHandCards(RemainingEnemyDeck, enemyHand, EnemyHand, EnemyDeck, enemy.Handsize);
-        GiveHandCards(RemainingPlayerDeck, playerHand, PlayerHand, PlayerDeck, playerHandSize);
+        _enemy.RemainingDeck = new List<Card>(_enemy.Deck);
+        _player.RemainingDeck = new List<Card>(_player.Deck);
+        _enemy.Hand = new List<Card>();
+        _player.Hand = new List<Card>();
+
+        GiveHandCards(_enemy);
+        GiveHandCards(_player);
 
         StartCoroutine(PlayerTurn());
         
@@ -193,10 +174,10 @@ public class BattleManager : MonoBehaviour
             Destroy(card.gameObject);
         }
 
-        EnemyDeck.Clear();
-        EnemyHand.Clear();
-        PlayerDeck.Clear();
-        PlayerHand.Clear();
+        //   _enemy.Deck.Clear();
+        _enemy.Hand.Clear();
+      //  _player.Deck.Clear();
+        _player.Hand.Clear();
         battleField.SetActive(false);
     }
 }
