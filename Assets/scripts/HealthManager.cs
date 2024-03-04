@@ -41,7 +41,7 @@ public class HealthManager : MonoBehaviour
         var delta = Mathf.Clamp(value - victim.Armor, 0, int.MaxValue);
         victim.Armor = Mathf.Clamp(victim.Armor -= value, 0, int.MaxValue);
         victim.ArmorText.text = victim.Armor.ToString();
-        victim.Health = Mathf.Clamp(victim.Health -= delta, 0, victim.MaxHealth);
+        victim.Health = Mathf.Clamp(victim.Health -= delta, 0, victim.GetMaxHealth());
         victim.HealthText.text = victim.Health.ToString();
         
         CheckForAlive();
@@ -55,7 +55,7 @@ public class HealthManager : MonoBehaviour
 
     public void RestoreHealth(int value, Character character)
     {
-        character.Health = Mathf.Clamp(character.Health += value, 0, character.MaxHealth); 
+        character.Health = Mathf.Clamp(character.Health += value, 0, character.GetMaxHealth()); 
         character.HealthText.text = character.Health.ToString();
         enemyHealthText.text = _enemy.Health.ToString();
         

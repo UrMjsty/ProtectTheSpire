@@ -5,6 +5,23 @@ using UnityEngine;
 
 public struct Card
 {
+    public override int GetHashCode()
+    {
+        return base.GetHashCode();
+    }
+
+    public override string ToString()
+    {
+        return Name;
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (obj == null)
+            return false;
+        return Name == obj.ToString();
+    }
+
     public enum CardType
     {
         ATTACK,
@@ -98,13 +115,14 @@ public class CardManager : MonoBehaviour
         switch (card.Type)
         {
             case Card.CardType.ATTACK:
-                HM.TakeDamage(card.Value * User.Damage, User.Opponent);
+                HM.TakeDamage(card.Value * User.GetDamage(), User.Opponent);
+                print(User.GetDamage().ToString());
                 break;
             case Card.CardType.HEAL:
                 HM.RestoreHealth(card.Value, User);
                 break;
             case Card.CardType.PROTECT:
-                HM.GainArmor(card.Value * User.ArmorUp, User);
+                HM.GainArmor(card.Value * User.GetArmorUp(), User);
                 break;
         }
         foreach (var ability in card.Abilities)
@@ -112,7 +130,7 @@ public class CardManager : MonoBehaviour
             switch (ability)
             {
                 case Card.AbilityType.LIFESTEAL:
-                    HM.RestoreHealth(card.Value * User.Damage / 2, User);
+                    HM.RestoreHealth(card.Value * User.GetDamage() / 2, User);
                     break;
                 case Card.AbilityType.BERSERK:
                     HM.TakeDamage(1, User);

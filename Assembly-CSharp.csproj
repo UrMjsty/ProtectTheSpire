@@ -48,10 +48,12 @@
      <Compile Include="Assets/scripts/HealthManager.cs" />
      <Compile Include="Assets/scripts/InventoryManager.cs" />
      <Compile Include="Assets/scripts/DropPlace.cs" />
+     <Compile Include="Assets/scripts/CurvedText/CurvedTextEditor.cs" />
      <Compile Include="Assets/scripts/MerchInfo.cs" />
      <Compile Include="Assets/scripts/CardManager.cs" />
      <Compile Include="Assets/scripts/DeckManager.cs" />
      <Compile Include="Assets/scripts/EnemyManager.cs" />
+     <Compile Include="Assets/scripts/CurvedText/CurvedText.cs" />
      <Compile Include="Assets/scripts/GameManager.cs" />
      <Compile Include="Assets/scripts/ItemManager.cs" />
      <Compile Include="Assets/scripts/ShopManager.cs" />
